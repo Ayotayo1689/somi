@@ -15,6 +15,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
+import BrandImg from "./asset/insta.jpg"
 
 const serviceCards = [
   {
@@ -22,14 +23,14 @@ const serviceCards = [
     copy: "Visual identity, layouts, branded materials, social graphics, and campaign-ready assets.",
     includes: ["Identity assets", "Social templates", "Brand layouts"],
     image:
-      "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1577327966244-999949c7e884?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
     title: "Social Media Management",
     copy: "Strategy, scheduling, community management, growth reporting, and always-on presence.",
     includes: ["Content calendars", "Captions", "Analytics"],
     image:
-      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1759393852314-59dc00faeed3?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
     title: "Video Editing",
@@ -171,7 +172,7 @@ const zServices = [
   {
     title: "Content days",
     image:
-      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1759393852314-59dc00faeed3?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     copy:
       "Receive a day's worth of raw footage that is yours to edit and use however you like. Perfect for businesses that need a versatile bank of raw content.",
     included: [
@@ -222,8 +223,8 @@ const imagePool = [
   "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=900&q=80",
   "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
   "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=900&q=80",
+  "https://images.unsplash.com/photo-1577327966244-999949c7e884?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "https://images.unsplash.com/photo-1759393852314-59dc00faeed3?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=900&q=80",
 ];
 
@@ -426,14 +427,10 @@ function Home() {
         </div>
 
         <div className="home-hero-video">
-          <video
-            src="/simi-home.mp4"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-label="SOMI homepage brand video"
+          <img
+            src={BrandImg}
+            alt="SOMI homepage brand video"
+            className=" object-cover w-full h-full"
           />
         </div>
       </section>
