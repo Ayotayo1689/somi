@@ -232,9 +232,15 @@ img {
   width: 46px;
   height: 46px;
   place-items: center;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 242, 230, 0.65);
   border-radius: 999px;
-  background: var(--paper);
+  background: var(--serenade);
+  color: var(--palm);
+}
+
+.menu-toggle svg {
+  color: var(--palm);
+  stroke: var(--palm);
 }
 
 .mobile-menu {
@@ -2231,7 +2237,7 @@ p {
   }
 
   .soft-button {
-    width: 52px;
+    /* width: 52px; */
     min-height: 36px;
     font-size: 8px;
   }
@@ -2241,46 +2247,55 @@ p {
   }
 
   .home-service-grid {
-    grid-template-columns: repeat(4, minmax(126px, 1fr));
-    overflow-x: auto;
-    padding-bottom: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    overflow-x: visible;
+    padding-bottom: 0;
   }
 
   .home-service-card img {
-    height: 158px;
+    height: 210px;
   }
 
   .home-service-card span {
-    font-size: 12px;
+    font-size: 17px;
+    line-height: 1.1;
   }
 
   .home-about {
-    grid-template-columns: 61% 79%;
-    overflow-x: hidden;
+    grid-template-columns: 1fr;
+    overflow-x: visible;
   }
 
   .home-about,
   .home-about-image,
   .home-about-image img {
-    min-height: 236px;
+    min-height: 0;
+  }
+
+  .home-about-image img {
+    height: 310px;
   }
 
   .home-about-copy {
-    padding: 28px 24px;
+    padding: 30px 22px 34px;
   }
 
   .home-about-copy h2 {
-    font-size: 28px;
+    max-width: 100%;
+    font-size: 39px;
+    line-height: 0.95;
   }
 
   .home-about-copy p {
-    margin-top: 12px;
-    font-size: 7px;
-    line-height: 1.45;
+    max-width: 100%;
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.55;
   }
 
   .home-about-copy .soft-button {
-    margin-top: 10px;
+    margin-top: 18px;
   }
 
   .home-trusted {
