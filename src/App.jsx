@@ -439,7 +439,7 @@ function Home() {
       <HomeAbout />
       <HomeClients />
       <HomePortfolio />
-      <HomeContact />
+      <ContactSection />
     </>
   );
 }
@@ -510,68 +510,6 @@ function HomePortfolio() {
           View our portfolio
         </Link>
       </div>
-    </section>
-  );
-}
-
-function HomeContact() {
-  return (
-    <section className="home-contact" id="home-contact">
-      <div className="home-contact-copy reveal">
-        <h2>Contact Us</h2>
-        <p>
-          Interested in working together? Fill out some info and we will be in
-          touch shortly. We can't wait to hear from you!
-        </p>
-      </div>
-      <form className="home-contact-form reveal">
-        <label className="full-label">
-          Name
-          <div className="split-inputs">
-            <span>
-              <small>First Name <em>(required)</em></small>
-              <input type="text" />
-            </span>
-            <span>
-              <small>Last Name <em>(required)</em></small>
-              <input type="text" />
-            </span>
-          </div>
-        </label>
-        <label>
-          Email <small>(required)</small>
-          <input type="email" />
-        </label>
-        <label>
-          Company/Brand Name <small>(required)</small>
-          <input type="text" />
-        </label>
-        <label>
-          Instagram Handle
-          <input type="text" />
-        </label>
-        <fieldset>
-          <legend>How did you find us?</legend>
-          {["Instagram", "TikTok", "Google Search", "Word of Mouth", "Other"].map((item) => (
-            <label className="check-label" key={item}>
-              <input type="checkbox" /> {item}
-            </label>
-          ))}
-        </fieldset>
-        <fieldset>
-          <legend>Which service are you interested in? Select all that apply <small>(required)</small></legend>
-          {["Brand Strategy", "Content Creation", "Social Media Management", "Something else"].map((item) => (
-            <label className="check-label" key={item}>
-              <input type="checkbox" /> {item}
-            </label>
-          ))}
-        </fieldset>
-        <label>
-          Tell us more!
-          <textarea placeholder="Let us know your goals, vision, and what you'd like support with." />
-        </label>
-        <button type="button">Send</button>
-      </form>
     </section>
   );
 }
