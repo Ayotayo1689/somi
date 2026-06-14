@@ -1,0 +1,43 @@
+@font-face {
+  font-family: "Gilroy";
+  src: url("../src/gilroy/Gilroy-Medium.ttf") format("truetype");
+  /* font-weight: 600; */
+  font-style: normal;
+}
+
+#root {
+  /* max-width: 1280px; */
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  text-align: center;
+  font-family: "Gilroy", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+/* Scrollbar styling for WebKit-based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 80px; /* Width of vertical scrollbar */
+  height: 80px; /* Height of horizontal scrollbar */
+}
+
+::-webkit-scrollbar-track {
+  background: #e0e0e0; /* Track (background) color */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: blue; /* Thumb (scrolling indicator) color */
+  border-radius: 10px; /* Rounded corners */
+  border: 20px solid transparent; /* To add spacing around the thumb */
+  background-clip: padding-box; /* Ensures border doesn't mess up thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: darkblue; /* Change color on hover */
+}
+
+
+
+
