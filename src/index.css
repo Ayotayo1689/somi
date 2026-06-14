@@ -305,6 +305,13 @@ img {
   letter-spacing: -0.055em;
 }
 
+.font-font{
+    font-family: Georgia, "Times New Roman", serif;
+     font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
 .home-hero-copy h1 {
   max-width: 545px;
   color: var(--z-warm);

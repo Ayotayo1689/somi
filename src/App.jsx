@@ -368,7 +368,11 @@ function PageHero({ eyebrow, title, copy, image, compact = false }) {
     <section className={`page-hero section-shell reveal ${compact ? "compact" : ""}`}>
       <div>
         <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
+        <h1 className="font-font mb-6">
+          <em>
+            {title}
+          </em>
+        </h1>
         {copy && <p>{copy}</p>}
       </div>
       {image && (
@@ -629,10 +633,12 @@ function ServicesPage() {
         </div>
       </section>
 
-      <section className="services-final-cta reveal">
+      <section className="services-final-cta reveal p-2">
         <img src={imagePool[2]} alt="" />
-        <h2>Got something else in mind?</h2>
-        <Link to="/contact">If none of these options are quite right for you, get in touch!</Link>
+        <h2 className="font-font">
+          <em>Got something else in mind?</em>
+        </h2>
+        <Link to="/contact"> get in touch!</Link>
       </section>
     </>
   );
@@ -741,7 +747,9 @@ function PhotoPortfolioPage() {
         ))}
       </section>
       <section className="next-page section-shell reveal">
-        <h2>View our video portfolio</h2>
+        <h2 className="font-font">
+          <em>View our video portfolio</em>
+        </h2>
         <Link className="primary-button" to="/video-portfolio">
           Explore videos <ArrowUpRight size={18} />
         </Link>
@@ -772,7 +780,9 @@ function VideoPortfolioPage() {
         ))}
       </section>
       <section className="next-page section-shell reveal">
-        <h2>View our photo portfolio</h2>
+        <h2 className="font-font">
+          <em>View our photo portfolio</em>
+        </h2>
         <Link className="primary-button" to="/photo-portfolio">
           Explore photos <ArrowUpRight size={18} />
         </Link>
@@ -834,9 +844,11 @@ function ContactTeaser() {
 function ContactSection() {
   return (
     <section className="contact section-shell">
-      <div className="contact-copy reveal">
+      <div className="contact-copy reveal ">
         <p className="eyebrow">Contact</p>
-        <h2>Tell us what you want to make stick.</h2>
+        <h2 className="font-font">
+          <em>Tell us what you want to make stick.</em>
+        </h2>
         <p>
           Whether you need identity, content, ads, PR, campaign direction, or a
           long-term creative partner, start here.
