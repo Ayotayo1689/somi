@@ -1,124 +1,140 @@
 import { Link } from "react-router-dom";
-import ProductCard from "@/componeents/ProductCard";
-import { products } from "@/data/products";
-import { useEffect, useRef } from "react";
+import ContactSection from "../components/ContactSection";
+import Marquee from "../components/Marquee";
+import BrandImg from "../asset/insta.jpg";
+import {
+  imagePool,
+  logoClients,
+  portfolioShowcase,
+  serviceCards,
+} from "../data/siteData";
 
-export default function Home({ addToCart }) {
-  const featuredProducts = products.slice(0, 12);
-
-  const videoRef1 = useRef(null);
-  const videoRef2 = useRef(null);
-
-  useEffect(() => {
-    const playVideos = () => {
-      [videoRef1.current, videoRef2.current].forEach((video) => {
-        if (video) {
-          video.muted = true;
-          video.playsInline = true;
-          video.setAttribute("webkit-playsinline", "true");
-          video.setAttribute("x5-playsinline", "true");
-          video.play().catch(() => {});
-        }
-      });
-    };
-
-    playVideos();
-
-    // As fallback — play after user first touch
-    window.addEventListener("touchstart", playVideos, { once: true });
-
-    return () => {
-      window.removeEventListener("touchstart", playVideos);
-    };
-  }, []);
+function ServicePreview() {
+  const labels = [
+    "The brand subscription",
+    "Content Days",
+    "Social media management",
+    "Strategy Deck",
+  ];
 
   return (
-    <div>
-      <section className="relative h-[80vh] flex items-center justify-center mb-16 overflow-hidden">
-        <div className="absolute inset-0 grid grid-cols-1 md:grid-cols-2 gap-0 w-full h-full">
-          <video
-            ref={videoRef1}
-            className="w-full h-full object-cover"
-            muted
-            loop
-            playsInline
-            preload="auto"
-            webkit-playsinline="true"
-            disablePictureInPicture
-            controls={false}
-          >
-            <source
-              src="https://www.shutterstock.com/shutterstock/videos/1098864383/preview/stock-footage-silhouette-of-a-man-putting-on-his-jacket-in-dark-room-on-the-background-of-the-window-close-up.webm"
-              type="video/mp4"
-            />
-          </video>
+    <section className="home-services">
+      <div className="home-service-grid">
+        {serviceCards.slice(0, 4).map((service, index) => (
+          <Link className="home-service-card reveal" key={service.title} to="/services">
+            <img src={service.image} alt="" />
+            <span>{labels[index]}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-          <video
-            ref={videoRef2}
-            className="hidden md:block w-full h-full object-cover"
-            muted
-            loop
-            playsInline
-            preload="auto"
-            webkit-playsinline="true"
-            disablePictureInPicture
-            controls={false}
-          >
-            <source
-              src="https://www.shutterstock.com/shutterstock/videos/1112105367/preview/stock-footage-content-stylish-young-black-man-in-his-s-enjoys-dancing-while-listening-to-an-online-playlist.webm"
-              type="video/mp4"
-            />
-          </video>
-        </div>
+function HomeAbout() {
+  return (
+    <section className="home-about reveal">
+      <div className="home-about-image">
+        <img src={imagePool[2]} alt="Agency team planning a brand campaign" />
+      </div>
+      <div className="home-about-copy">
+        <h2>
+          Meet SOMI,
+          <em> the founders of sticky brands.</em>
+        </h2>
+        <p>
+          SOMI was born from a desire to help brands move from being seen to
+          being remembered. With strategy, content, and creative direction, we
+          shape digital presence that lands where it matters most.
+        </p>
+        <p>
+          Whether it is a visual identity, a campaign, or social media built for
+          consistency, every choice is intentional and every touchpoint has a
+          role.
+        </p>
+        <Link className="soft-button dark" to="/about">
+          Learn more
+        </Link>
+      </div>
+    </section>
+  );
+}
 
-        <div className="absolute inset-0 bg-black/40" />
+function HomeClients() {
+  return (
+    <section className="home-trusted reveal">
+      <h2>
+        Trusted by <em>brands</em> globally.
+      </h2>
+      <div className="home-client-strip">
+        {logoClients.map((client) => (
+          <span key={client}>{client}</span>
+        ))}
+      </div>
+    </section>
+  );
+}
 
-        <div className="relative z-10 text-center">
-          <h1 className="text-5xl font-bold mb-4 text-white">
-            Discover the collective
+function HomePortfolio() {
+  return (
+    <section className="home-portfolio reveal">
+      <div className="home-portfolio-backdrop" />
+      <button className="portfolio-arrow left" type="button" aria-label="Previous portfolio item">
+        &larr;
+      </button>
+      <div className="portfolio-rail">
+        {portfolioShowcase.map((item, index) => (
+          <article className="portfolio-shot" key={item}>
+            <img src={imagePool[index % imagePool.length]} alt="" />
+          </article>
+        ))}
+      </div>
+      <button className="portfolio-arrow right" type="button" aria-label="Next portfolio item">
+        &rarr;
+      </button>
+      <div className="portfolio-button-row">
+        <Link className="portfolio-button" to="/photo-portfolio">
+          View our portfolio
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+export default function Home() {
+  return (
+    <>
+      <section className="home-hero reveal">
+        <div className="home-hero-copy">
+          <h1>
+            Brands made
+            <em> unforgettable.</em>
           </h1>
-          <p className="text-gray-200">Premium streetwear and fashion</p>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="max-w-7xl mx-auto px-4 mb-16">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-        <div className="text-right mt-8">
-          <Link
-            to="/all-products"
-            className="text-sm font-medium hover:underline"
-          >
-            View all →
+          <p>
+            We create strategic, scroll-stopping brand identities and content
+            systems that transform your digital presence and turn attention
+            into growth.
+          </p>
+          <Link className="soft-button" to="/about">
+            Learn more
           </Link>
         </div>
-      </section>
 
-      {/* Lifestyle Section */}
-      <section className="bg-gray-100  overflow-clip  mb-16">
-        <div className="   ">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
-            <div className="md:h-[90vh] aspect-square bg-gray-300 flex items-center justify-center">
-              <img
-                src="https://img.freepik.com/free-photo/medium-shot-model-wearing-chain-necklace_23-2149439826.jpg"
-                alt="Lifestyle"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className=" md:h-[90vh] aspect-square bg-gray-300 flex items-center justify-center">
-              <img
-                src="https://img.freepik.com/free-photo/portrait-young-handsome-male_23-2148884391.jpg"
-                alt="Lifestyle"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
+        <div className="home-hero-video">
+          <img
+            src={BrandImg}
+            alt="SOMI homepage brand video"
+            className="object-cover w-full h-full"
+          />
         </div>
       </section>
-    </div>
+
+      <Marquee label="Our Services" />
+      <ServicePreview />
+      <HomeAbout />
+      <HomeClients />
+      <HomePortfolio />
+      <ContactSection />
+    </>
   );
 }
