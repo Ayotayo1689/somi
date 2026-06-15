@@ -1,29 +1,20 @@
 import { Link } from "react-router-dom";
 import ContactSection from "../components/ContactSection";
 import Marquee from "../components/Marquee";
-import BrandImg from "../asset/insta.jpg";
-import {
-  imagePool,
-  logoClients,
-  portfolioShowcase,
-  serviceCards,
-} from "../data/siteData";
+import { useContent, usePage } from "../lib/content";
 
-function ServicePreview() {
-  const labels = [
-    "The brand subscription",
-    "Content Days",
-    "Social media management",
-    "Strategy Deck",
-  ];
+function ServicePreview({ page, services }) {
+  const previewItems = page.servicePreviewItems?.length
+    ? page.servicePreviewItems
+    : (page.servicePreviewLabels || []).map((label, index) => ({ label, image: services[index]?.image }));
 
   return (
     <section className="home-services">
       <div className="home-service-grid">
-        {serviceCards.slice(0, 4).map((service, index) => (
-          <Link className="home-service-card reveal" key={service.title} to="/services">
-            <img src={service.image} alt="" />
-            <span>{labels[index]}</span>
+        {previewItems.slice(0, 4).map((item, index) => (
+          <Link className="home-service-card reveal" key={item.label || index} to="/services">
+            <img src={item.image || services[index]?.image} alt="" />
+            <span>{item.label || services[index]?.title}</span>
           </Link>
         ))}
       </div>
@@ -31,40 +22,36 @@ function ServicePreview() {
   );
 }
 
-function HomeAbout() {
+function HomeAbout({ page }) {
+  const about = page.aboutPreview || {};
   return (
     <section className="home-about reveal">
       <div className="home-about-image">
-        <img src={imagePool[2]} alt="Agency team planning a brand campaign" />
+        <img src={about.image} alt="Agency team planning a brand campaign" />
       </div>
       <div className="home-about-copy">
         <h2>
-          Meet SOMI,
-          <em> the founders of sticky brands.</em>
+          {about.title}
+          <em> {about.highlightedTitle}</em>
         </h2>
-        <p>
-          SOMI was born from a desire to help brands move from being seen to
-          being remembered. With strategy, content, and creative direction, we
-          shape digital presence that lands where it matters most.
-        </p>
-        <p>
-          Whether it is a visual identity, a campaign, or social media built for
-          consistency, every choice is intentional and every touchpoint has a
-          role.
-        </p>
-        <Link className="soft-button dark" to="/about">
-          Learn more
+        {(about.paragraphs || []).map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+        <Link className="soft-button dark" to={about.buttonUrl || "/about"}>
+          {about.buttonText || "Learn more"}
         </Link>
       </div>
     </section>
   );
 }
 
-function HomeClients() {
+function HomeClients({ page, clients }) {
+  const trusted = page.trustedSection || {};
+  const logoClients = clients.filter((client) => client.showInTrustedStrip).map((client) => client.name);
   return (
     <section className="home-trusted reveal">
       <h2>
-        Trusted by <em>brands</em> globally.
+        {trusted.title} <em>{trusted.highlightedWord}</em> {trusted.suffix}
       </h2>
       <div className="home-client-strip">
         {logoClients.map((client) => (
@@ -75,17 +62,19 @@ function HomeClients() {
   );
 }
 
-function HomePortfolio() {
+function HomePortfolio({ page, portfolio }) {
+  const preview = page.portfolioPreview || {};
+  const items = portfolio.filter((item) => item.type === "photo" && item.isActive !== false).slice(0, 5);
   return (
     <section className="home-portfolio reveal">
-      <div className="home-portfolio-backdrop" />
+      <div className="home-portfolio-backdrop" style={{ backgroundImage: `linear-gradient(rgba(20, 53, 3, 0.08), rgba(20, 53, 3, 0.08)), url(${preview.backgroundImage})` }} />
       <button className="portfolio-arrow left" type="button" aria-label="Previous portfolio item">
         &larr;
       </button>
       <div className="portfolio-rail">
-        {portfolioShowcase.map((item, index) => (
-          <article className="portfolio-shot" key={item}>
-            <img src={imagePool[index % imagePool.length]} alt="" />
+        {items.map((item) => (
+          <article className="portfolio-shot" key={item.id || item.title}>
+            <img src={item.image || item.thumbnail} alt="" />
           </article>
         ))}
       </div>
@@ -93,8 +82,8 @@ function HomePortfolio() {
         &rarr;
       </button>
       <div className="portfolio-button-row">
-        <Link className="portfolio-button" to="/photo-portfolio">
-          View our portfolio
+        <Link className="portfolio-button" to={preview.buttonUrl || "/photo-portfolio"}>
+          {preview.buttonText || "View our portfolio"}
         </Link>
       </div>
     </section>
@@ -102,38 +91,38 @@ function HomePortfolio() {
 }
 
 export default function Home() {
+  const page = usePage("home");
+  const { services, clients, portfolio } = useContent();
+  const hero = page.hero || {};
+
   return (
     <>
       <section className="home-hero reveal">
         <div className="home-hero-copy">
           <h1>
-            Brands made
-            <em> unforgettable.</em>
+            {hero.title}
+            <em> {hero.highlightedTitle}</em>
           </h1>
-          <p>
-            We create strategic, scroll-stopping brand identities and content
-            systems that transform your digital presence and turn attention
-            into growth.
-          </p>
-          <Link className="soft-button" to="/about">
-            Learn more
+          <p>{hero.description}</p>
+          <Link className="soft-button" to={hero.buttonUrl || "/about"}>
+            {hero.buttonText || "Learn more"}
           </Link>
         </div>
 
         <div className="home-hero-video">
           <img
-            src={BrandImg}
+            src={hero.image}
             alt="SOMI homepage brand video"
             className="object-cover w-full h-full"
           />
         </div>
       </section>
 
-      <Marquee label="Our Services" />
-      <ServicePreview />
-      <HomeAbout />
-      <HomeClients />
-      <HomePortfolio />
+      <Marquee label={page.servicesMarqueeTitle || "Our Services"} />
+      <ServicePreview page={page} services={services.filter((service) => service.isActive !== false)} />
+      <HomeAbout page={page} />
+      <HomeClients page={page} clients={clients} />
+      <HomePortfolio page={page} portfolio={portfolio} />
       <ContactSection />
     </>
   );

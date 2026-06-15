@@ -2,32 +2,37 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import Marquee from "../components/Marquee";
 import PageHero from "../components/PageHero";
-import { imagePool, photoProjects } from "../data/siteData";
+import { useContent, usePage } from "../lib/content";
 
 export default function PhotoPortfolio() {
+  const page = usePage("photo-portfolio");
+  const { portfolio } = useContent();
+  const projects = portfolio.filter((item) => item.type === "photo" && item.isActive !== false);
+
   return (
     <>
       <PageHero
-        eyebrow="Portfolio"
-        title="Photo examples"
-        copy="A visual wall for brand shoots, campaigns, social content, launch assets, and editorial direction."
+        eyebrow={page.hero?.eyebrow}
+        title={page.hero?.title}
+        copy={page.hero?.description}
+        image={page.hero?.image}
         compact
       />
-      <Marquee label="Photo Examples" />
+      <Marquee label={page.marqueeTitle || "Photo Examples"} />
       <section className="masonry section-shell">
-        {photoProjects.map((project, index) => (
-          <article className="masonry-card reveal" key={project}>
-            <img src={imagePool[index % imagePool.length]} alt="" />
-            <span>{project}</span>
+        {projects.map((project) => (
+          <article className="masonry-card reveal" key={project.id || project.title}>
+            <img src={project.image} alt={project.alt || ""} />
+            <span>{project.title}</span>
           </article>
         ))}
       </section>
       <section className="next-page section-shell reveal">
         <h2 className="font-font">
-          <em>View our video portfolio</em>
+          <em>{page.nextPageCta?.title}</em>
         </h2>
-        <Link className="primary-button" to="/video-portfolio">
-          Explore videos <ArrowUpRight size={18} />
+        <Link className="primary-button" to={page.nextPageCta?.buttonUrl || "/video-portfolio"}>
+          {page.nextPageCta?.buttonText} <ArrowUpRight size={18} />
         </Link>
       </section>
     </>

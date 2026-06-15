@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, Instagram, Menu, X } from "lucide-react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { useContent } from "../lib/content";
 
 function ScrollAndReveal() {
   const location = useLocation();
@@ -30,6 +31,8 @@ function ScrollAndReveal() {
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [portfolioOpen, setPortfolioOpen] = useState(false);
+  const { navigation, siteSettings } = useContent();
+  const links = [...(navigation.headerLinks || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
   const closeMenu = () => {
     setMenuOpen(false);
     setPortfolioOpen(false);
@@ -38,34 +41,33 @@ function Header() {
   return (
     <header className="site-header">
       <Link className="brand-mark" to="/" onClick={closeMenu}>
-        <span>somi</span>
+        <span>{siteSettings.brandName || "somi"}</span>
       </Link>
 
       <nav className="desktop-nav" aria-label="Primary navigation">
-        <NavLink to="/services">Services</NavLink>
-        <NavLink to="/about">About</NavLink>
-        <div
-          className="nav-dropdown"
-          onMouseEnter={() => setPortfolioOpen(true)}
-          onMouseLeave={() => setPortfolioOpen(false)}
-        >
-          <button
-            type="button"
-            onClick={() => setPortfolioOpen((open) => !open)}
-            aria-expanded={portfolioOpen}
-          >
-            Portfolio <ChevronDown size={14} />
-          </button>
-          {portfolioOpen && (
-            <div className="dropdown-panel">
-              <NavLink to="/video-portfolio">Video Portfolio</NavLink>
-              <NavLink to="/photo-portfolio">Photo Portfolio</NavLink>
-              <NavLink to="/our-clients">Our Clients</NavLink>
+        {links.map((link) =>
+          link.isDropdown ? (
+            <div
+              className="nav-dropdown"
+              key={link.label}
+              onMouseEnter={() => setPortfolioOpen(true)}
+              onMouseLeave={() => setPortfolioOpen(false)}
+            >
+              <button type="button" onClick={() => setPortfolioOpen((open) => !open)} aria-expanded={portfolioOpen}>
+                {link.label} <ChevronDown size={14} />
+              </button>
+              {portfolioOpen && (
+                <div className="dropdown-panel">
+                  {(link.children || []).map((child) => (
+                    <NavLink key={child.path} to={child.path}>{child.label}</NavLink>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <NavLink to="/our-clients">Our Clients</NavLink>
-        <NavLink to="/contact">Contact</NavLink>
+          ) : (
+            <NavLink key={link.path} to={link.path}>{link.label}</NavLink>
+          ),
+        )}
       </nav>
 
       <button
@@ -78,53 +80,56 @@ function Header() {
       </button>
 
       <div className={`mobile-menu ${menuOpen ? "is-open" : ""}`}>
-        <NavLink to="/services" onClick={closeMenu}>
-          Services
-        </NavLink>
-        <NavLink to="/about" onClick={closeMenu}>
-          About
-        </NavLink>
-        <span>Portfolio</span>
-        <NavLink to="/video-portfolio" onClick={closeMenu}>
-          Video Portfolio
-        </NavLink>
-        <NavLink to="/photo-portfolio" onClick={closeMenu}>
-          Photo Portfolio
-        </NavLink>
-        <NavLink to="/our-clients" onClick={closeMenu}>
-          Our Clients
-        </NavLink>
-        <NavLink to="/contact" onClick={closeMenu}>
-          Contact
-        </NavLink>
+        {links.map((link) =>
+          link.isDropdown ? (
+            <div key={link.label}>
+              <span>{link.label}</span>
+              {(link.children || []).map((child) => (
+                <NavLink key={child.path} to={child.path} onClick={closeMenu}>{child.label}</NavLink>
+              ))}
+            </div>
+          ) : (
+            <NavLink key={link.path} to={link.path} onClick={closeMenu}>{link.label}</NavLink>
+          ),
+        )}
       </div>
     </header>
   );
 }
 
 function Footer() {
+  const { siteSettings } = useContent();
   return (
     <footer className="footer">
       <div className="footer-brand">
-        <h2>somi the agency</h2>
+        <h2>{siteSettings.footerBrand || "somi the agency"}</h2>
         <div className="footer-socials" aria-label="Social links">
-          <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <a href={siteSettings.instagramUrl || "https://instagram.com"} target="_blank" rel="noreferrer" aria-label="Instagram">
             <Instagram size={20} />
           </a>
-          <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
+          <a href={siteSettings.facebookUrl || "https://facebook.com"} target="_blank" rel="noreferrer" aria-label="Facebook">
             f
           </a>
         </div>
       </div>
       <div className="footer-contact">
         <Link to="/contact">Contact</Link>
-        <a href="mailto:info@somiagency.co">info@somiagency.co</a>
+        <a href={`mailto:${siteSettings.footerEmail || siteSettings.primaryEmail}`}>{siteSettings.footerEmail || siteSettings.primaryEmail}</a>
       </div>
     </footer>
   );
 }
 
 export default function SiteLayout({ children }) {
+  const { siteSettings } = useContent();
+
+  useEffect(() => {
+    const theme = siteSettings.theme || {};
+    Object.entries(theme).forEach(([key, value]) => {
+      if (value) document.documentElement.style.setProperty(`--${key}`, value);
+    });
+  }, [siteSettings.theme]);
+
   return (
     <div className="somi-site">
       <ScrollAndReveal />

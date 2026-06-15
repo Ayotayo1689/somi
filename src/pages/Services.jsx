@@ -1,127 +1,90 @@
 import { Link } from "react-router-dom";
-import { imagePool, zServices } from "../data/siteData";
+import { useContent, usePage } from "../lib/content";
+
+function SnakeText({ id, label, className = "" }) {
+  return (
+    <svg className={`snake-text ${className}`} viewBox="0 0 1500 360" aria-hidden="true">
+      <path id={id} d="M -220 210 C 95 110, 230 230, 470 160 S 810 30, 1020 130 S 1315 300, 1700 160" />
+      <text>
+        <textPath href={`#${id}`} startOffset="-35%">
+          {Array.from({ length: 8 }).map(() => `${label}  `).join("")}
+          <animate attributeName="startOffset" from="-35%" to="10%" dur="14s" repeatCount="indefinite" />
+        </textPath>
+      </text>
+    </svg>
+  );
+}
 
 export default function Services() {
+  const page = usePage("services");
+  const { services, stats } = useContent();
+  const hero = page.hero || {};
+  const contentPortfolioBlock = page.contentPortfolioBlock || {};
+  const socialResultsBlock = page.socialResultsBlock || {};
+  const finalCta = page.finalCta || {};
+
   return (
     <>
       <section className="services-page-hero">
         <div>
-          <h1>Our Services</h1>
-          <h2>Strategic content creation & social media management</h2>
+          <h1>{hero.title}</h1>
+          <h2>{hero.subtitle}</h2>
         </div>
-        <p>
-          Ready to take your content to the next level & grow on socials?
-          Whether you need captivating photo and video content, strategic social
-          media management, or a combination of both, we are here to help you
-          achieve your goals and start seeing real results!
-        </p>
+        <p>{hero.description}</p>
       </section>
 
       <section className="z-service-grid">
-        {zServices.map((service) => (
+        {services.filter((service) => service.isActive !== false).map((service) => (
           <article className="z-service-card reveal" key={service.title}>
             <img src={service.image} alt="" />
             <h3>{service.title}</h3>
-            <p>{service.copy}</p>
+            <p>{service.description}</p>
             <strong>WHAT'S INCLUDED:</strong>
             <ul>
-              {service.included.map((item) => (
+              {(service.included || []).map((item) => (
                 <li key={item}>~ {item}</li>
               ))}
             </ul>
-            {service.link && <Link to="/contact">{service.link}</Link>}
+            {service.linkText && <Link to={service.linkUrl || "/contact"}>{service.linkText}</Link>}
           </article>
         ))}
       </section>
 
       <div className="services-enquire">
-        <Link to="/contact">Enquire to work with us</Link>
+        <Link to={page.enquireCta?.url || "/contact"}>{page.enquireCta?.text || "Enquire to work with us"}</Link>
       </div>
 
       <section className="content-portfolio-block reveal">
-        <svg className="snake-text content-snake-text" viewBox="0 0 1500 360" aria-hidden="true">
-          <path
-            id="contentSnakeTextPath"
-            d="M -220 210 C 95 110, 230 230, 470 160 S 810 30, 1020 130 S 1315 300, 1700 160"
-          />
-          <text>
-            <textPath href="#contentSnakeTextPath" startOffset="-35%">
-              Content Creation Portfolio&nbsp;&nbsp; Content Creation Portfolio&nbsp;&nbsp;
-              Content Creation Portfolio&nbsp;&nbsp; Content Creation Portfolio&nbsp;&nbsp;
-              Content Creation Portfolio&nbsp;&nbsp; Content Creation Portfolio&nbsp;&nbsp;
-              Content Creation Portfolio&nbsp;&nbsp; Content Creation Portfolio&nbsp;&nbsp;
-              <animate
-                attributeName="startOffset"
-                from="-35%"
-                to="10%"
-                dur="14s"
-                repeatCount="indefinite"
-              />
-            </textPath>
-          </text>
-        </svg>
-        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=80" alt="" />
+        <SnakeText id="contentSnakeTextPath" label={contentPortfolioBlock.marqueeText || "Content Creation Portfolio"} className="content-snake-text" />
+        <img src={contentPortfolioBlock.image} alt="" />
         <div>
-          <p>
-            Our content creation packages are ideal for clients seeking fresh,
-            high-quality content for their social channels. From relatable
-            short-form videos to aesthetic, professional stills, we offer both
-            photo and video options to fit your content needs.
-          </p>
-          <Link to="/photo-portfolio">Content Creation Portfolio</Link>
+          <p>{contentPortfolioBlock.description}</p>
+          <Link to={contentPortfolioBlock.buttonUrl || "/photo-portfolio"}>{contentPortfolioBlock.buttonText}</Link>
         </div>
       </section>
 
       <section className="social-results-block reveal">
-        <svg className="snake-text" viewBox="0 0 1500 360" aria-hidden="true">
-          <path
-            id="snakeTextPath"
-            d="M -220 270 C 90 210, 195 105, 430 145 S 780 245, 990 135 S 1290 -10, 1700 70"
-          />
-          <text>
-            <textPath href="#snakeTextPath" startOffset="-10%">
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              Social Management Results&nbsp;&nbsp; Social Management Results&nbsp;&nbsp;
-              <animate
-                attributeName="startOffset"
-                from="-35%"
-                to="10%"
-                dur="14s"
-                repeatCount="indefinite"
-              />
-            </textPath>
-          </text>
-        </svg>
+        <SnakeText id="snakeTextPath" label={socialResultsBlock.marqueeText || "Social Management Results"} />
         <div>
-          <p>
-            For businesses looking to elevate their social media presence and
-            hand over the daily task of running their socials. If you're
-            struggling with your strategy or not seeing sales through social
-            media, this is for you!
-          </p>
-          <Link to="/contact">Work with us!</Link>
+          <p>{socialResultsBlock.description}</p>
+          <Link to={socialResultsBlock.buttonUrl || "/contact"}>{socialResultsBlock.buttonText}</Link>
         </div>
         <div className="results-collage">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <span key={index}>
-              <b>{index % 2 ? "Accounts reached" : "Profile activity"}</b>
-              <strong>{[9305, 103644, 42151, 7564][index % 4].toLocaleString()}</strong>
+          {stats.filter((stat) => stat.isActive !== false).slice(0, 8).map((stat) => (
+            <span key={stat.id || stat.label}>
+              <b>{stat.label}</b>
+              <strong>{Number(stat.value || 0).toLocaleString()}{stat.suffix || ""}</strong>
             </span>
           ))}
         </div>
       </section>
 
       <section className="services-final-cta reveal p-2">
-        <img src={imagePool[2]} alt="" />
+        <img src={finalCta.image} alt="" />
         <h2 className="font-font">
-          <em>Got something else in mind?</em>
+          <em>{finalCta.title}</em>
         </h2>
-        <Link to="/contact"> get in touch!</Link>
+        <Link to={finalCta.buttonUrl || "/contact"}>{finalCta.buttonText}</Link>
       </section>
     </>
   );
