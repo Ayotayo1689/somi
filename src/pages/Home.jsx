@@ -67,7 +67,7 @@ function HomePortfolio({ page, portfolio }) {
   const items = portfolio.filter((item) => item.type === "photo" && item.isActive !== false).slice(0, 5);
   return (
     <section className="home-portfolio reveal">
-      <div className="home-portfolio-backdrop" style={{ backgroundImage: `linear-gradient(rgba(20, 53, 3, 0.08), rgba(20, 53, 3, 0.08)), url(${preview.backgroundImage})` }} />
+      <div className="home-portfolio-backdrop" style={{ backgroundImage: `linear-gradient(var(--image-wash), var(--image-wash)), url(${preview.backgroundImage})` }} />
       <button className="portfolio-arrow left" type="button" aria-label="Previous portfolio item">
         &larr;
       </button>

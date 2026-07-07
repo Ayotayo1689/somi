@@ -2,11 +2,15 @@ import { ArrowUpRight, Instagram, Mail } from "lucide-react";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "../lib/api";
-import { usePage } from "../lib/content";
+import { useContent, usePage } from "../lib/content";
 
 export default function ContactSection({ section }) {
   const contactPage = usePage("contact");
+  const { siteSettings } = useContent();
   const content = section || contactPage.contactSection || {};
+  const instagramUrl = content.instagramUrl || siteSettings.instagramUrl || "https://instagram.com";
+  const instagramUsername = content.instagramUsername || siteSettings.instagramUsername || "Instagram";
+  const instagramLabel = instagramUsername.startsWith("@") ? instagramUsername : `@${instagramUsername}`;
   const [form, setForm] = useState({ name: "", email: "", projectType: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
 
@@ -40,8 +44,8 @@ export default function ContactSection({ section }) {
           <a href={`mailto:${content.email}`}>
             <Mail size={18} /> {content.email}
           </a>
-          <a href={content.instagramUrl || "https://instagram.com"} target="_blank" rel="noreferrer">
-            <Instagram size={18} /> Instagram
+          <a href={instagramUrl} target="_blank" rel="noreferrer">
+            <Instagram size={18} /> {instagramLabel}
           </a>
         </div>
       </div>

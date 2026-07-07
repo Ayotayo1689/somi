@@ -8,7 +8,14 @@ function mergeContent(content) {
   return {
     ...defaultContent,
     ...content,
-    siteSettings: { ...defaultContent.siteSettings, ...(content?.siteSettings || {}) },
+    siteSettings: {
+      ...defaultContent.siteSettings,
+      ...(content?.siteSettings || {}),
+      theme: {
+        ...defaultContent.siteSettings.theme,
+        ...(content?.siteSettings?.theme || {}),
+      },
+    },
     navigation: { ...defaultContent.navigation, ...(content?.navigation || {}) },
     pages: { ...defaultContent.pages, ...(content?.pages || {}) },
     services: content?.services?.length ? content.services : defaultContent.services,

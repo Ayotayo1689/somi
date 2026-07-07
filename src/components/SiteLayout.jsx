@@ -99,6 +99,8 @@ function Header() {
 
 function Footer() {
   const { siteSettings } = useContent();
+  const instagramLabel = siteSettings.instagramUsername ? `@${siteSettings.instagramUsername.replace(/^@/, "")}` : "Instagram";
+
   return (
     <footer className="footer">
       <div className="footer-brand">
@@ -106,6 +108,7 @@ function Footer() {
         <div className="footer-socials" aria-label="Social links">
           <a href={siteSettings.instagramUrl || "https://instagram.com"} target="_blank" rel="noreferrer" aria-label="Instagram">
             <Instagram size={20} />
+            <span>{instagramLabel}</span>
           </a>
           <a href={siteSettings.facebookUrl || "https://facebook.com"} target="_blank" rel="noreferrer" aria-label="Facebook">
             f
@@ -126,7 +129,11 @@ export default function SiteLayout({ children }) {
   useEffect(() => {
     const theme = siteSettings.theme || {};
     Object.entries(theme).forEach(([key, value]) => {
-      if (value) document.documentElement.style.setProperty(`--${key}`, value);
+      if (value) {
+        const cssKey = String(key).replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+        document.documentElement.style.setProperty(`--${key}`, value);
+        document.documentElement.style.setProperty(`--${cssKey}`, value);
+      }
     });
   }, [siteSettings.theme]);
 

@@ -3,10 +3,30 @@ import { toast } from "react-toastify";
 import { api, clearAdminToken, getAdminToken, setAdminToken } from "../lib/api";
 import { defaultContent } from "../data/defaultContent";
 
-const pageSlugs = ["home", "services", "about", "photo-portfolio", "video-portfolio", "clients", "contact"];
-const collectionNames = ["services", "portfolio", "clients", "stats"];
+const pageSlugs = ["home", "services", "about", "clients", "contact"];
+const portfolioTabs = [
+  { key: "portfolio:video", title: "Video Portfolio", type: "video" },
+  { key: "portfolio:photo", title: "Photo Portfolio", type: "photo" },
+];
+const collectionNames = ["services", "clients", "stats"];
 const lockedFieldNames = new Set(["path", "buttonUrl", "linkUrl", "url"]);
 const allowedUrlFields = new Set(["image", "thumbnail", "videoUrl", "embedUrl", "instagramUrl", "facebookUrl", "tiktokUrl", "twitterUrl", "xUrl", "youtubeUrl", "linkedinUrl", "socialUrl"]);
+const colorPattern = /^(#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\(.+\)|hsla?\(.+\))$/i;
+const colorFieldNames = new Set([
+  "palm",
+  "flower",
+  "sail",
+  "serenade",
+  "ink",
+  "paper",
+  "muted",
+  "onDark",
+  "subtleText",
+  "softText",
+  "line",
+  "danger",
+]);
+const shadowFieldNames = new Set(["shadow", "shadowSoft"]);
 
 function cloneValue(value) {
   return JSON.parse(JSON.stringify(value || {}));
@@ -26,6 +46,85 @@ function labelFromKey(key) {
     .replace(/([A-Z])/g, " $1")
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function mergeAdminContent(content) {
+  return {
+    ...defaultContent,
+    ...content,
+    siteSettings: {
+      ...defaultContent.siteSettings,
+      ...(content?.siteSettings || {}),
+      theme: {
+        ...defaultContent.siteSettings.theme,
+        ...(content?.siteSettings?.theme || {}),
+      },
+    },
+  };
+}
+
+function normalizeHexColor(value) {
+  const color = String(value || "").trim();
+  if (/^#[0-9a-f]{6}$/i.test(color)) return color;
+  if (/^#[0-9a-f]{3}$/i.test(color)) {
+    return `#${color.slice(1).split("").map((letter) => `${letter}${letter}`).join("")}`;
+  }
+  return defaultContent.siteSettings.theme.ink;
+}
+
+function isColorField(name, value) {
+  return colorFieldNames.has(String(name)) || colorPattern.test(String(value || ""));
+}
+
+function toHexChannel(value) {
+  const number = Math.max(0, Math.min(255, Number(value) || 0));
+  return Math.round(number).toString(16).padStart(2, "0");
+}
+
+function parseColorValue(value) {
+  const color = String(value || "").trim();
+  const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
+  if (hexMatch) return { hex: normalizeHexColor(color), format: "hex" };
+
+  const rgbMatch = color.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i);
+  if (!rgbMatch) return null;
+
+  return {
+    hex: `#${toHexChannel(rgbMatch[1])}${toHexChannel(rgbMatch[2])}${toHexChannel(rgbMatch[3])}`,
+    alpha: rgbMatch[4],
+    format: rgbMatch[4] === undefined ? "rgb" : "rgba",
+  };
+}
+
+function hexToRgb(hex) {
+  const normalized = normalizeHexColor(hex).replace("#", "");
+  return {
+    r: parseInt(normalized.slice(0, 2), 16),
+    g: parseInt(normalized.slice(2, 4), 16),
+    b: parseInt(normalized.slice(4, 6), 16),
+  };
+}
+
+function updateColorValue(currentValue, nextHex) {
+  const parsed = parseColorValue(currentValue);
+  if (!parsed || parsed.format === "hex") return nextHex;
+  const { r, g, b } = hexToRgb(nextHex);
+  return parsed.format === "rgba" ? `rgba(${r}, ${g}, ${b}, ${parsed.alpha ?? 1})` : `rgb(${r}, ${g}, ${b})`;
+}
+
+function parseShadowColor(value) {
+  const shadow = String(value || "");
+  const colorMatch = shadow.match(/rgba?\([^)]+\)|#[0-9a-f]{3,8}/i);
+  if (!colorMatch) return null;
+  const parsed = parseColorValue(colorMatch[0]);
+  if (!parsed) return null;
+  return { ...parsed, raw: colorMatch[0] };
+}
+
+function updateShadowColor(currentValue, nextHex) {
+  const parsed = parseShadowColor(currentValue);
+  if (!parsed) return currentValue;
+  return String(currentValue).replace(parsed.raw, updateColorValue(parsed.raw, nextHex));
 }
 
 function getAtPath(source, path) {
@@ -59,13 +158,25 @@ function makeEmptyLike(value) {
   return "";
 }
 
-function FieldEditor({ name, value, path, onChange, onRemove, canRemove }) {
+function makePortfolioItem(type = "photo", order = 1) {
+  return {
+    title: "",
+    type,
+    image: "",
+    thumbnail: "",
+    videoUrl: "",
+    order,
+    isActive: true,
+  };
+}
+
+function FieldEditor({ name, value, path, onChange, onRemove, canRemove, collection, portfolioType }) {
   const fieldId = path.join("-");
 
   if (Array.isArray(value)) {
     const addItem = () => {
-      const template = value[0] ?? "";
-      onChange(path, [...value, makeEmptyLike(template)]);
+      const template = collection === "portfolio" ? makePortfolioItem(portfolioType || "photo", value.length + 1) : (value[0] ?? "");
+      onChange(path, [...value, collection === "portfolio" ? template : makeEmptyLike(template)]);
     };
 
     return (
@@ -84,6 +195,8 @@ function FieldEditor({ name, value, path, onChange, onRemove, canRemove }) {
                 onChange={onChange}
                 onRemove={() => onChange(path, value.filter((_, itemIndex) => itemIndex !== index))}
                 canRemove={value.length > 0}
+                collection={collection}
+                portfolioType={portfolioType}
               />
               {typeof item !== "object" || item === null ? (
                 <button type="button" className="admin-remove" onClick={() => onChange(path, value.filter((_, itemIndex) => itemIndex !== index))}>
@@ -99,7 +212,24 @@ function FieldEditor({ name, value, path, onChange, onRemove, canRemove }) {
   }
 
   if (value && typeof value === "object") {
-    const entries = Object.entries(value).filter(([key]) => canEditField(key));
+    const editableValue = { ...value };
+    if (collection === "portfolio") {
+      if (portfolioType) editableValue.type = portfolioType;
+      if (editableValue.type === "video") {
+        if (!Object.prototype.hasOwnProperty.call(editableValue, "thumbnail")) editableValue.thumbnail = "";
+        if (!Object.prototype.hasOwnProperty.call(editableValue, "videoUrl")) editableValue.videoUrl = "";
+      } else if (!Object.prototype.hasOwnProperty.call(editableValue, "image")) {
+        editableValue.image = "";
+      }
+    }
+
+    const entries = Object.entries(editableValue).filter(([key]) => {
+      if (!canEditField(key)) return false;
+      if (collection === "portfolio" && portfolioType && key === "type") return false;
+      if (collection === "portfolio" && ["thumbnail", "videoUrl"].includes(key) && editableValue.type !== "video") return false;
+      if (collection === "portfolio" && key === "image" && editableValue.type === "video") return false;
+      return true;
+    });
 
     return (
       <fieldset className="admin-fieldset">
@@ -113,7 +243,15 @@ function FieldEditor({ name, value, path, onChange, onRemove, canRemove }) {
         </div>
         <div className="admin-object-grid">
           {entries.map(([key, item]) => (
-            <FieldEditor key={key} name={key} value={item} path={[...path, key]} onChange={onChange} />
+            <FieldEditor
+              key={key}
+              name={key}
+              value={item}
+              path={[...path, key]}
+              onChange={onChange}
+              collection={collection}
+              portfolioType={portfolioType}
+            />
           ))}
         </div>
       </fieldset>
@@ -138,7 +276,69 @@ function FieldEditor({ name, value, path, onChange, onRemove, canRemove }) {
     );
   }
 
-  const isLongText = String(value || "").length > 90 || ["description", "message", "quote"].some((word) => String(name).toLowerCase().includes(word));
+  const lowerName = String(name).toLowerCase();
+  const isLongText = String(value || "").length > 90 || ["description", "message", "quote"].some((word) => lowerName.includes(word));
+
+  if (collection === "portfolio" && name === "type") {
+    if (portfolioType) return null;
+
+    return (
+      <label>
+        Type
+        <select value={value || "photo"} onChange={(event) => onChange(path, event.target.value)}>
+          <option value="photo">Photo</option>
+          <option value="video">Video</option>
+        </select>
+      </label>
+    );
+  }
+
+  if (isColorField(name, value)) {
+    const colorValue = String(value || "");
+    const parsedColor = parseColorValue(colorValue);
+    const canUseColorPicker = Boolean(parsedColor);
+
+    return (
+      <label>
+        {labelFromKey(name)}
+        <span className="admin-color-input">
+          <span className="admin-color-swatch" style={{ background: colorValue }} aria-hidden="true" />
+          {canUseColorPicker && (
+            <input
+              type="color"
+              value={parsedColor.hex}
+              onChange={(event) => onChange(path, updateColorValue(colorValue, event.target.value))}
+              aria-label={`${labelFromKey(name)} picker`}
+            />
+          )}
+          <input value={value || ""} onChange={(event) => onChange(path, event.target.value)} />
+        </span>
+      </label>
+    );
+  }
+
+  if (shadowFieldNames.has(String(name))) {
+    const shadowValue = String(value || "");
+    const parsedShadow = parseShadowColor(shadowValue);
+
+    return (
+      <label>
+        {labelFromKey(name)}
+        <span className="admin-shadow-input">
+          <span className="admin-shadow-preview" style={{ boxShadow: shadowValue }} aria-hidden="true" />
+          {parsedShadow && (
+            <input
+              type="color"
+              value={parsedShadow.hex}
+              onChange={(event) => onChange(path, updateShadowColor(shadowValue, event.target.value))}
+              aria-label={`${labelFromKey(name)} color picker`}
+            />
+          )}
+          <input value={value || ""} onChange={(event) => onChange(path, event.target.value)} />
+        </span>
+      </label>
+    );
+  }
 
   return (
     <label>
@@ -152,7 +352,7 @@ function FieldEditor({ name, value, path, onChange, onRemove, canRemove }) {
   );
 }
 
-function FormEditor({ title, value, onSave }) {
+function FormEditor({ title, value, onSave, collection, portfolioType }) {
   const [draft, setDraft] = useState(cloneValue(value));
   const [saving, setSaving] = useState(false);
 
@@ -190,10 +390,18 @@ function FormEditor({ title, value, onSave }) {
       </div>
       <div className="admin-form-editor">
         {Array.isArray(draft) ? (
-          <FieldEditor name={title} value={draft} path={[]} onChange={updatePath} />
+          <FieldEditor name={title} value={draft} path={[]} onChange={updatePath} collection={collection} portfolioType={portfolioType} />
         ) : (
           Object.entries(draft || {}).filter(([key]) => canEditField(key)).map(([key, item]) => (
-            <FieldEditor key={key} name={key} value={item} path={[key]} onChange={updatePath} />
+            <FieldEditor
+              key={key}
+              name={key}
+              value={item}
+              path={[key]}
+              onChange={updatePath}
+              collection={collection}
+              portfolioType={portfolioType}
+            />
           ))
         )}
       </div>
@@ -279,13 +487,14 @@ function MediaManager() {
       </div>
       <form className="admin-upload" onSubmit={upload}>
         <input value={folder} onChange={(event) => setFolder(event.target.value)} placeholder="Folder" />
-        <input type="file" accept="image/*" onChange={(event) => setFile(event.target.files?.[0])} />
-        <button type="submit">Upload image</button>
+        <input type="file" accept="image/*,video/*" onChange={(event) => setFile(event.target.files?.[0])} />
+        <button type="submit">Upload media</button>
       </form>
       <div className="admin-media-grid">
         {media.map((item) => (
           <article key={item.id}>
             {item.type?.startsWith("image") && <img src={item.url} alt={item.altText || ""} />}
+            {item.type?.startsWith("video") && <video src={item.url} muted playsInline preload="metadata" />}
             <input value={item.url} readOnly onFocus={(event) => event.target.select()} />
           </article>
         ))}
@@ -338,8 +547,8 @@ export default function Admin() {
   const tabs = useMemo(
     () => [
       "site-settings",
-    
       ...pageSlugs.map((slug) => `page:${slug}`),
+      ...portfolioTabs.map((tab) => tab.key),
       ...collectionNames.map((name) => `collection:${name}`),
       "enquiries",
     ],
@@ -349,7 +558,7 @@ export default function Admin() {
   const load = async () => {
     setLoading(true);
     try {
-      setContent(await api.getBootstrap());
+      setContent(mergeAdminContent(await api.getBootstrap()));
     } catch (error) {
       toast.error(error.message || "Could not load admin data");
       setContent(defaultContent);
@@ -369,6 +578,42 @@ export default function Admin() {
     setAuthed(false);
   };
 
+  const savePortfolioType = async (type, payload) => {
+    if (!Array.isArray(payload)) throw new Error("Portfolio must be an array");
+
+    const existingItems = content.portfolio || [];
+    const existingForType = existingItems.filter((item) => item.type === type);
+    const payloadIds = new Set(payload.map((item) => item.id).filter(Boolean));
+
+    await Promise.all(
+      existingForType
+        .filter((item) => item.id && !payloadIds.has(item.id))
+        .map((item) => api.remove("portfolio", item.id)),
+    );
+
+    await Promise.all(
+      payload.map((item, index) => {
+        const { id, ...body } = item;
+        const typedBody = {
+          ...body,
+          type,
+          order: body.order || index + 1,
+        };
+
+        if (type === "photo") {
+          delete typedBody.thumbnail;
+          delete typedBody.videoUrl;
+        } else {
+          delete typedBody.image;
+        }
+
+        return id ? api.update("portfolio", id, typedBody) : api.create("portfolio", typedBody);
+      }),
+    );
+
+    await load();
+  };
+
   const renderEditor = () => {
     if (active === "site-settings") {
       return <FormEditor title="Site Settings" value={content.siteSettings} onSave={(payload) => api.updateSettings(payload).then(load)} />;
@@ -383,12 +628,29 @@ export default function Admin() {
       return <FormEditor title={`Page: ${slug}`} value={content.pages?.[slug] || {}} onSave={(payload) => api.updatePage(slug, payload).then(load)} />;
     }
 
+    if (active.startsWith("portfolio:")) {
+      const tab = portfolioTabs.find((item) => item.key === active);
+      const portfolioType = tab?.type || "photo";
+      const items = (content.portfolio || []).filter((item) => item.type === portfolioType);
+
+      return (
+        <FormEditor
+          title={tab?.title || "Portfolio"}
+          value={items}
+          collection="portfolio"
+          portfolioType={portfolioType}
+          onSave={(payload) => savePortfolioType(portfolioType, payload)}
+        />
+      );
+    }
+
     if (active.startsWith("collection:")) {
       const collection = active.replace("collection:", "");
       return (
         <FormEditor
           title={`Collection: ${collection}`}
           value={content[collection] || []}
+          collection={collection}
           onSave={async (payload) => {
             if (!Array.isArray(payload)) throw new Error("Collection must be an array");
             await Promise.all(
@@ -416,7 +678,7 @@ export default function Admin() {
         <nav>
           {tabs.map((tab) => (
             <button className={active === tab ? "is-active" : ""} key={tab} type="button" onClick={() => setActive(tab)}>
-              {tab.replace("page:", "Page: ").replace("collection:", "")}
+              {portfolioTabs.find((item) => item.key === tab)?.title || tab.replace("page:", "Page: ").replace("collection:", "")}
             </button>
           ))}
         </nav>
