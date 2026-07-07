@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ArrowUpRight, Pause, Play } from "lucide-react";
+import { ArrowUpRight, Expand, Pause, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import Marquee from "../components/Marquee";
 import PageHero from "../components/PageHero";
@@ -32,6 +32,23 @@ export default function VideoPortfolio() {
       setPlayingId(id);
     } catch {
       setPlayingId("");
+    }
+  };
+
+  const openFullscreen = async (project) => {
+    const video = videoRefs.current[project.id || project.title];
+    if (!video || !project.videoUrl) return;
+
+    try {
+      if (video.requestFullscreen) {
+        await video.requestFullscreen();
+      } else if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        await video.webkitRequestFullscreen();
+      }
+    } catch {
+      // Some browsers block fullscreen unless it comes directly from a tap/click.
     }
   };
 
@@ -75,6 +92,15 @@ export default function VideoPortfolio() {
                 aria-label={playingId === (project.id || project.title) ? `Pause ${project.title}` : `Play ${project.title}`}
               >
                 {playingId === (project.id || project.title) ? <Pause size={30} fill="currentColor" /> : <Play size={30} fill="currentColor" />}
+              </button>
+              <button
+                type="button"
+                className="video-fullscreen-toggle"
+                onClick={() => openFullscreen(project)}
+                disabled={!project.videoUrl}
+                aria-label={`Open ${project.title} fullscreen`}
+              >
+                <Expand size={20} />
               </button>
             </div>
             <h3>{project.title}</h3>
