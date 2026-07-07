@@ -106,18 +106,21 @@ function Footer() {
       <div className="footer-brand">
         <h2>{siteSettings.footerBrand || "somi the agency"}</h2>
         <div className="footer-socials" aria-label="Social links">
-          <a href={siteSettings.instagramUrl || "https://instagram.com"} target="_blank" rel="noreferrer" aria-label="Instagram">
+          <a className="flex gap-4" href={siteSettings.instagramUrl || "https://instagram.com"} target="_blank" rel="noreferrer" aria-label="Instagram">
             <Instagram size={20} />
-            <span>{instagramLabel}</span>
+            <span className="text-sm font-medium">{instagramLabel}</span>
           </a>
-          <a href={siteSettings.facebookUrl || "https://facebook.com"} target="_blank" rel="noreferrer" aria-label="Facebook">
+          <a className="flex gap-4" href={siteSettings.facebookUrl || "https://facebook.com"} target="_blank" rel="noreferrer" aria-label="Facebook">
+          <span className="border-2 border-white p-[2px] rounded w-5 h-5 flex items-center justify-center  ">
             f
+          </span>
+            <span className="text-sm font-medium">Facebook</span>
           </a>
         </div>
       </div>
       <div className="footer-contact">
         <Link to="/contact">Contact</Link>
-        <a href={`mailto:${siteSettings.footerEmail || siteSettings.primaryEmail}`}>{siteSettings.footerEmail || siteSettings.primaryEmail}</a>
+        <a className=" whitespace-nowrap " href={`mailto:${siteSettings.footerEmail || siteSettings.primaryEmail}`}>{siteSettings.footerEmail || siteSettings.primaryEmail}</a>
       </div>
     </footer>
   );
