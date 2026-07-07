@@ -27,7 +27,7 @@ function HomeAbout({ page }) {
   return (
     <section className="home-about reveal">
       <div className="home-about-image">
-        <img src={about.image} alt="Agency team planning a brand campaign" />
+        <img className=" max-h-[90vh] " src={about.image} alt="Agency team planning a brand campaign" />
       </div>
       <div className="home-about-copy">
         <h2>
@@ -113,7 +113,7 @@ export default function Home() {
           <img
             src={hero.image}
             alt="SOMI homepage brand video"
-            className="object-cover w-full h-full"
+            className="object-cover w-full max-h-[90vh] h-full"
           />
         </div>
       </section>
